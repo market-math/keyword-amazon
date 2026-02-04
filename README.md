@@ -274,8 +274,9 @@ When running full analysis (`--import-csv` without tracker), keywords are catego
     ├── parsers.py            # Data parsing
     ├── analyzers/            # Analysis algorithms
     └── commands/
-        ├── fetch_sqp_data.py # Fetch SQP data via SP-API
-        └── analyze_sqp.py    # Analyze SQP data and write to Sheets
+        ├── fetch_sqp_data.py     # Fetch SQP data via SP-API
+        ├── fetch_traffic_sales.py # Fetch traffic & sales by ASIN
+        └── analyze_sqp.py        # Analyze SQP data and write to Sheets
 ```
 
 ## SP-API SQP Fetching
@@ -364,3 +365,57 @@ The command creates/updates these Google Sheets tabs:
 | **Bullets** | 50-80% volume percentile | High |
 | **Backend** | 20-50% volume percentile | Medium |
 | **Description** | Bottom 20% volume | Lower |
+
+## Traffic and Sales Report
+
+The `fetch_traffic_sales` command fetches Business Report data (traffic and sales) by child ASIN.
+
+### Usage
+
+```bash
+# Request report for last 7 days (daily by child ASIN)
+python -m sqp_analyzer.commands.fetch_traffic_sales --asin B0CSH12L5P
+
+# Request and wait for completion
+python -m sqp_analyzer.commands.fetch_traffic_sales --asin B0CSH12L5P --wait
+
+# Weekly granularity instead of daily
+python -m sqp_analyzer.commands.fetch_traffic_sales --asin B0CSH12L5P --date-granularity WEEK
+
+# Custom date range
+python -m sqp_analyzer.commands.fetch_traffic_sales --start-date 2026-01-01 --end-date 2026-01-31
+
+# Check status of pending report
+python -m sqp_analyzer.commands.fetch_traffic_sales --check REPORT_ID
+
+# List recent reports
+python -m sqp_analyzer.commands.fetch_traffic_sales --list
+```
+
+### Report Options
+
+| Option | Values | Default | Description |
+|--------|--------|---------|-------------|
+| `--date-granularity` | DAY, WEEK, MONTH | DAY | Time period aggregation |
+| `--asin-granularity` | PARENT, CHILD, SKU | CHILD | Product aggregation level |
+
+### Metrics Returned
+
+**Sales Metrics:**
+- Units Ordered
+- Ordered Product Sales ($)
+- Units Shipped
+- Orders Shipped
+- Refund Rate
+
+**Traffic Metrics:**
+- Page Views (browser + mobile)
+- Sessions
+- Buy Box Percentage
+- Unit Session Percentage
+
+### Notes
+
+- Reports typically take **5-15 minutes** to process
+- Data is available 72 hours after the period closes
+- Use `CHILD` granularity to see individual variation performance
