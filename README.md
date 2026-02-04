@@ -274,9 +274,10 @@ When running full analysis (`--import-csv` without tracker), keywords are catego
     ├── parsers.py            # Data parsing
     ├── analyzers/            # Analysis algorithms
     └── commands/
-        ├── fetch_sqp_data.py     # Fetch SQP data via SP-API
-        ├── fetch_traffic_sales.py # Fetch traffic & sales by ASIN
-        └── analyze_sqp.py        # Analyze SQP data and write to Sheets
+        ├── fetch_sqp_data.py         # Fetch SQP data via SP-API
+        ├── fetch_traffic_sales.py    # Fetch traffic & sales by ASIN
+        ├── analyze_sqp.py            # Analyze SQP data and write to Sheets
+        └── analyze_traffic_sales.py  # Write traffic/sales to Sheets
 ```
 
 ## SP-API SQP Fetching
@@ -419,3 +420,26 @@ python -m sqp_analyzer.commands.fetch_traffic_sales --list
 - Reports typically take **5-15 minutes** to process
 - Data is available 72 hours after the period closes
 - Use `CHILD` granularity to see individual variation performance
+
+### Write to Google Sheets
+
+Use `analyze_traffic_sales` to write report data to Google Sheets:
+
+```bash
+# Write completed report to Google Sheets
+python -m sqp_analyzer.commands.analyze_traffic_sales --report-id REPORT_ID
+```
+
+### Workflow
+
+1. Request report: `python -m sqp_analyzer.commands.fetch_traffic_sales --asin B0XXXXXXXX`
+2. Wait 5-15 minutes for processing
+3. Check status: `python -m sqp_analyzer.commands.fetch_traffic_sales --check REPORT_ID`
+4. Once DONE, write to Sheets: `python -m sqp_analyzer.commands.analyze_traffic_sales --report-id REPORT_ID`
+
+### Output Tabs
+
+| Tab | Description |
+|-----|-------------|
+| **Traffic-ByDate** | Daily metrics: units, sales, sessions, page views, buy box % |
+| **Traffic-ByASIN** | Per-ASIN metrics: units, sales, sessions, buy box % |
